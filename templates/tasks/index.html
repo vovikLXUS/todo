@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold m-0">TODO list</h1>
+    <a href="{% url 'tasks:task-create' %}" class="btn btn-primary px-3 py-2">Add task</a>
+</div>
+
+{% for task in task_list %}
+    <div class="task-item">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+                <span class="fw-bold fs-5 text-dark">{{ task.content }}</span>
+                {% if task.is_done %}
+                    <span class="text-success fw-bold ms-1">Done</span>
+                {% else %}
+                    <span class="text-danger fw-bold ms-1">Not done</span>
+                {% endif %}
+            </div>
+            <div>
+                <form action="{% url 'tasks:toggle-task-status' task.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    {% if task.is_done %}
+                        <button type="submit" class="btn btn-secondary px-3 py-2">Undo</button>
+                    {% else %}
+                        <button type="submit" class="btn btn-success px-3 py-2">Complete</button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <p class="mb-2 text-dark">
+            Created: {{ task.created_at|date:"F j, Y, g:i a" }}{% if task.deadline %} <span class="deadline-text">Deadline: {{ task.deadline|date:"F j, Y, g:i a" }}</span>{% endif %}
+        </p>
+
+        <p class="text-secondary mb-0">
+            Tags:{% for tag in task.tags.all %} {{ tag.name }}{% endfor %}
+            <a href="{% url 'tasks:task-update' task.id %}">Update</a>
+            <a href="{% url 'tasks:task-delete' task.id %}">Delete</a>
+        </p>
+
+        <hr class="my-4">
+    </div>
+{% empty %}
+    <p class="text-muted">No tasks available.</p>
+{% endfor %}
+
+{% endblock %}
